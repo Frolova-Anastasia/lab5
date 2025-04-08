@@ -1,0 +1,14 @@
+help
+show
+add
+Телевизор Samsung
+120
+300
+29999.99
+SQUARE_METERS
+Samsung
+Samsung Electronics
+COMMERCIAL
+save
+show
+
