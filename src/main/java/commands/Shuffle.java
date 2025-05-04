@@ -25,6 +25,7 @@ public class Shuffle implements Command{
         try{
             NumberArgsChecker.checkArgs(commandArgs, 0);
             collectionManager.shuffle(collectionManager.getProducts());
+            System.out.println("Элементы в коллекции перемешаны");
         } catch (WrongNumberOfArgsException e){
             System.out.println(e.getMessage());
         }

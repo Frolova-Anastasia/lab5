@@ -10,10 +10,12 @@ import utility.InputManager;
 public class Update implements Command {
     private final CollectionManager collectionManager;
     private final Console console;
+    private final InputManager inputManager;
 
-    public Update(CollectionManager collectionManager, Console console) {
+    public Update(CollectionManager collectionManager, Console console, InputManager inputManager) {
         this.collectionManager = collectionManager;
         this.console = console;
+        this.inputManager = inputManager;
     }
 
     @Override
@@ -35,7 +37,6 @@ public class Update implements Command {
                 console.write("Нет продукта с таким id: ");
                 collectionManager.printProductIdsAndNames();
             }else{
-            InputManager inputManager = new InputManager(collectionManager, console);
             Product product = inputManager.updateProduct(id);
             collectionManager.update(id, product);
             System.out.println("Продукт с ID: " + product.getId() + " обновлен");}

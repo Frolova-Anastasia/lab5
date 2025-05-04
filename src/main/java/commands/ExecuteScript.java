@@ -4,18 +4,17 @@ package commands;
 import utility.*;
 
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.HashSet;
-import java.util.Scanner;
-import java.util.Set;
+import java.io.BufferedReader;
+import java.io.FileReader;
+
+import java.util.Stack;
 
 public class ExecuteScript implements Command {
     private final Console console;
     private final Invoker invoker;
     private final InputManager inputManager;
     private final CollectionManager collectionManager;
-    private static final Set<String> callSet = new HashSet<>();
+    private static final Stack<String> fileStack = new Stack<>();
     private static final int MAX_RECURSION_DEPTH = 10;
     private static int currentRecursionDepth = 0;
 
@@ -42,39 +41,50 @@ public class ExecuteScript implements Command {
             console.write("Ошибка: Не указано имя файла скрипта");
             return;
         }
+
         String fileName = args.trim();
+
+        // Проверка рекурсии
+        if (fileStack.contains(fileName)) {
+            console.write("Ошибка: Обнаружена рекурсия в файле " + fileName);
+            return;
+        }
+
         if (currentRecursionDepth >= MAX_RECURSION_DEPTH) {
-            console.write("Ошибка: Превышена максимальная глубина вложенности скриптов (" + MAX_RECURSION_DEPTH + ")");
+            console.write("Ошибка: Превышена максимальная глубина вложенности (" + MAX_RECURSION_DEPTH + ")");
             return;
         }
-        if (callSet.contains(fileName)) {
-            console.write("Обнаружена рекурсия! Файл " + fileName + " уже выполняется");
-            return;
-        }
-        try {
-            callSet.add(fileName);
-            currentRecursionDepth++;
 
-            File scriptFile = new File(fileName);
-            if (!scriptFile.exists()) {
-                console.write("Файл скрипта не существует: " + fileName);
-                return;
+        fileStack.push(fileName);
+        currentRecursionDepth++;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            inputManager.setScriptReader(reader);
+
+            console.write("Начало выполнения скрипта: " + fileName);
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+
+                try {
+                    console.write(">" + line);
+                    invoker.executeCommand(line);
+                } catch (Exception e) {
+                    console.write("Ошибка при выполнении команды '" + line + "': " + e.getMessage());
+                    // Продолжаем выполнение скрипта после ошибки
+                }
             }
-            try (Scanner fileScanner = new Scanner(new File(fileName))) {
-                //ScriptConsole scriptConsole = new ScriptConsole(fileScanner, console);
-                //Invoker scriptInvoker = new Invoker(scriptConsole, collectionManager, inputManager);
-                //scriptInvoker.getCommands().putAll(invoker.getCommands()); //копирование команд из интерактивного режима
-                //scriptInvoker.consoleReader();
-
-            } catch (FileNotFoundException e) {
-                console.write("Файл скрипта не найден");
-            } catch (Exception e) {
-                console.write("Ошибка выполнения скрипта: " + e.getMessage());
-            }
-
+            console.write("Скрипт " + fileName + " выполнен успешно");
+            inputManager.setScriptReader(null);
+        } catch (Exception e) {
+            console.write("Ошибка выполнения скрипта: " + e.getMessage());
         } finally {
-            callSet.remove(fileName);
+            inputManager.setScriptReader(null);
+            fileStack.pop();
             currentRecursionDepth--;
         }
     }
 }
+
+

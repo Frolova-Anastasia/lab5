@@ -25,6 +25,7 @@ public class Clear implements Command{
         try{
             NumberArgsChecker.checkArgs(commandArgs, 0);
             collectionManager.clear();
+            System.out.println("Коллекция очищена");
         } catch (WrongNumberOfArgsException e){
             System.out.println(e.getMessage());
         }

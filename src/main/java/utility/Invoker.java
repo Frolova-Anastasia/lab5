@@ -28,14 +28,15 @@ public class Invoker {
         commands.put("clear", new Clear(collectionManager));
         commands.put("exit", new Exit());
         commands.put("shuffle", new Shuffle(collectionManager));
-        commands.put("update", new Update(collectionManager, console));
+        commands.put("update", new Update(collectionManager, console, inputManager));
         commands.put("remove", new Remove(collectionManager));
         commands.put("save", new Save(collectionManager));
-        commands.put("insert", new Insert(collectionManager, console));
-        commands.put("remove_greater", new RemoveGreater(collectionManager, console));
+        commands.put("insert", new Insert(collectionManager, console, inputManager));
+        commands.put("remove_greater", new RemoveGreater(collectionManager, console, inputManager));
         commands.put("count_by_price", new CountByPrice(collectionManager));
         commands.put("filter_greater_than_manufacturer", new FilterGreaterManufacturer(collectionManager, console));
         commands.put("print_unique_manufacturer", new PrintUniqueManufacturer(collectionManager));
+        commands.put("execute_script", new ExecuteScript(console, this, inputManager, collectionManager));
     }
 
     public void start() {
@@ -54,7 +55,7 @@ public class Invoker {
         }
     }
 
-    private void executeCommand(String commandLine) {
+    public void executeCommand(String commandLine) {
         String[] tokens = commandLine.split("\\s+", 2);
         String commandName = tokens[0];
         String commandArg = (tokens.length > 1) ? tokens[1] : null;
